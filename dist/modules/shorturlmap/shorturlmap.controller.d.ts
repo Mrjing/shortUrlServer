@@ -1,8 +1,8 @@
 import { ShortUrlMapService } from './shorturlmap.service';
 import { PRIMARY_ENV } from '../../constants';
-import { HashService } from '@/services/hash.service';
-import { RedisService } from '@/services/redis.service';
-import { BloomFilterService } from '@/services/bloomFilter.service';
+import { HashService } from '../../services/hash.service';
+import { RedisService } from '../../services/redis.service';
+import { BloomFilterService } from '../../services/bloomFilter.service';
 interface ICreateShortUrlReq {
     longUrl: string;
     expireTime?: number;
@@ -21,9 +21,13 @@ export declare class ShortUrlMapController {
     constructor(shortUrlService: ShortUrlMapService, hashServive: HashService, redisService: RedisService, bloomFilterService: BloomFilterService);
     getLongUrl(query?: {
         shortUrl?: string;
-    }): Promise<any>;
+    }): Promise<{
+        data: any;
+    }>;
     deleteShortUrlMap(body: IDeleteShortUrlMapReq): Promise<void>;
-    createShortUrl(body: ICreateShortUrlReq, req: any): Promise<string>;
+    createShortUrl(body: ICreateShortUrlReq, req: any): Promise<{
+        data: string;
+    }>;
     private idToShortUrl;
     private shortUrlToId;
     private transformReqShortUrl;

@@ -13,6 +13,8 @@ const shorturlmap_module_1 = require("./modules/shorturlmap/shorturlmap.module")
 const filter_1 = require("./middlewares/filter");
 const bloomFilter_service_1 = require("./services/bloomFilter.service");
 const redis_service_1 = require("./services/redis.service");
+const core_1 = require("@nestjs/core");
+const exception_1 = require("./exception");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(filter_1.filterMiddleware).forRoutes('*');
@@ -47,6 +49,10 @@ AppModule = __decorate([
         providers: [
             bloomFilter_service_1.BloomFilterService,
             redis_service_1.RedisService,
+            {
+                provide: core_1.APP_FILTER,
+                useClass: exception_1.AllExceptionsFilter
+            }
         ]
     })
 ], AppModule);

@@ -14,9 +14,9 @@ import {
 } from '@nestjs/common'
 import _ from 'lodash'
 import { ShortUrlMapService } from './shorturlmap.service'
-import { Collection, PRIMARY_ENV, BACKUP_ENV, CHARIN62 } from '../../constants'
+import { Collection, PRIMARY_ENV, BACKUP_ENV, CHARIN62, ERROR } from '../../constants'
 import { HashService } from '../../services/hash.service'
-import { calSingleCharSub } from '../../utils'
+import { calSingleCharSub, transformReqShortUrl } from '../../utils'
 import { RedisService } from '../../services/redis.service'
 import { BloomFilterService } from '../../services/bloomFilter.service'
 
@@ -27,11 +27,6 @@ interface ICreateShortUrlReq {
 
 interface IDeleteShortUrlMapReq {
     shortUrl?: string
-}
-
-export const EnvIdToShortFlagMap = {
-    [PRIMARY_ENV]: '0',
-    [BACKUP_ENV]: '1'
 }
 
 @Controller('shortUrl')
@@ -48,15 +43,25 @@ export class ShortUrlMapController {
     async getLongUrl(@Query() query: { shortUrl?: string } = {}) {
         const { shortUrl } = query
 
+        // 判断 shortUrl 是否存在
+        if (!shortUrl) {
+            throw new Error(JSON.stringify({
+                ...ERROR.INVALID_SHORTURL,
+                message: 'shortUrl not exist in url query!'
+            }))
+        }
+
         // 获取hashFlag, path
-        const { pathnameValue, hashFlag, realShortUrl } = this.transformReqShortUrl(shortUrl)
+        const { pathnameValue, hashFlag, realShortUrl } = transformReqShortUrl(shortUrl)
 
         // 先请求redis 查询
         try {
             let longUrl = await this.redisService.get(pathnameValue)
             if (longUrl) {
                 console.log('读redis 缓存')
-                return longUrl
+                return {
+                    data: longUrl
+                }
             }
         } catch (e) {
             console.log('redis 读异常打印', e)
@@ -72,12 +77,13 @@ export class ShortUrlMapController {
         console.log('urlMapRes', urlMapRes)
         if (urlMapRes.length === 0) {
             return {
-                code: 'SHORTURL_NOTEXIST',
-                message: '当前短链不存在'
+                data: ''
             }
         }
 
-        return urlMapRes[0].longUrl
+        return {
+            data: urlMapRes[0].longUrl
+        }
     }
 
     /**
@@ -89,8 +95,16 @@ export class ShortUrlMapController {
     async deleteShortUrlMap(@Body() body: IDeleteShortUrlMapReq) {
         const { shortUrl } = body
 
+        // 判断 shortUrl 是否存在
+        if (!shortUrl) {
+            throw new Error(JSON.stringify({
+                ...ERROR.INVALID_SHORTURL,
+                message: 'shortUrl not exist in url query'
+            }))
+        }
+
         // 获取hashFlag, path
-        const { pathnameValue, hashFlag, realShortUrl } = this.transformReqShortUrl(shortUrl)
+        const { pathnameValue, hashFlag, realShortUrl } = transformReqShortUrl(shortUrl)
 
         const res = await this.shortUrlService.deleteShortUrlMap({
             shortUrl: realShortUrl,
@@ -99,7 +113,7 @@ export class ShortUrlMapController {
         console.log('res', res)
         // 删除 redis 缓存
         try {
-            await this.redisService.set(pathnameValue, '', 0)
+            await this.redisService.set(pathnameValue, '', 1)
         } catch (e) {
             console.log('redis 写异常打印', e)
         }
@@ -108,8 +122,17 @@ export class ShortUrlMapController {
 
     // 生成短链
     @Post()
-    async createShortUrl(@Body() body: ICreateShortUrlReq, @Req() req): Promise<string> {
+    async createShortUrl(@Body() body: ICreateShortUrlReq, @Req() req): Promise<{ data: string }> {
+        console.log('body', body)
         const { longUrl, expireTime } = body
+
+        // 判断 shortUrl 是否存在
+        if (!longUrl) {
+            throw new Error(JSON.stringify({
+                ...ERROR.INVALID_LONGURL,
+                message: 'longUrl not exist in req body!'
+            }))
+        }
 
         // 计算该长链对应一致性hash值 （0 ，1）
         const hashFlag = this.hashServive.getEnvByHashUrl(longUrl)
@@ -121,7 +144,9 @@ export class ShortUrlMapController {
         console.log('existUrlMap', existUrlMap)
         // 存在则直接返回 shortUrl
         if (existUrlMap.length) {
-            return `http://${req.hostname}/${hashFlag}${existUrlMap[0].shortUrl}`
+            return {
+                data: `http://${req.hostname}/${hashFlag}${existUrlMap[0].shortUrl}`
+            }
         }
 
         const curTime = new Date()
@@ -172,7 +197,9 @@ export class ShortUrlMapController {
             console.log('bloomFilter 添加元素报错', e)
         }
 
-        return shortUrl
+        return {
+            data: shortUrl
+        }
     }
 
     /**
@@ -206,21 +233,5 @@ export class ShortUrlMapController {
                 id = id * 62 + calSingleCharSub(shortUrl[i], '0') + 52;
         }
         return id;
-    }
-
-    private transformReqShortUrl(originShortUrl: string): {
-        pathnameValue: string // 获取 url path中 / 之后的字符串
-        hashFlag: string // hash值（映射DB资源）
-        realShortUrl: string // DB 中存储的值
-    } {
-        const pathname = new URL(originShortUrl).pathname
-        const pathnameValue = pathname.substring(1) // redis 中存储 pathnameValue
-        const hashFlag = pathnameValue[0]
-        const realShortUrl = pathnameValue.substring(1)
-        return {
-            pathnameValue,
-            hashFlag,
-            realShortUrl
-        }
     }
 }

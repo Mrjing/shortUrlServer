@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.filterMiddleware = void 0;
 const common_1 = require("@nestjs/common");
 const bloomFilter_service_1 = require("../services/bloomFilter.service");
+const constants_1 = require("../constants");
 let filterMiddleware = class filterMiddleware {
     constructor(bloomFilterService) {
         this.bloomFilterService = bloomFilterService;
@@ -22,10 +23,7 @@ let filterMiddleware = class filterMiddleware {
         if ((method === 'get' || method === 'GET') && query) {
             const { shortUrl } = query;
             if (!shortUrl) {
-                res.end(JSON.stringify({
-                    code: 'INVALID_PARAMS',
-                    message: 'please set the shortUrl value in url query'
-                }));
+                throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_SHORTURL), { message: 'please set the shortUrl value in url query' })));
             }
             else {
                 console.log('shortUrl', shortUrl);
@@ -33,17 +31,10 @@ let filterMiddleware = class filterMiddleware {
                 const urlPathname = url.pathname;
                 const urlHost = url.hostname;
                 if (urlHost !== req.hostname) {
-                    res.end(JSON.stringify({
-                        code: 'INVALID_SHORTURL',
-                        message: 'invalid short url hostname'
-                    }));
+                    throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_SHORTURL), { message: 'the shortUrl hostname is different from req hostname' })));
                 }
                 if (urlPathname.length <= 2) {
-                    res.end(JSON.stringify({
-                        code: 'INVALID_SHORTURL',
-                        message: 'invalid short url'
-                    }));
-                    return;
+                    throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_SHORTURL), { message: 'the shortUrl pathname length must more than 2' })));
                 }
                 const pathnameValue = urlPathname.substring(1);
                 console.log('pathnameValue', pathnameValue);
@@ -54,11 +45,7 @@ let filterMiddleware = class filterMiddleware {
                     return;
                 }
                 else {
-                    res.end(JSON.stringify({
-                        code: 'INVALID_SHORTURL',
-                        message: 'invalid short url'
-                    }));
-                    return;
+                    throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_SHORTURL), { message: 'shortUrl is not exist in DB' })));
                 }
             }
         }

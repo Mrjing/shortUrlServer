@@ -6,6 +6,8 @@ import { ShortUrlMapModule } from './modules/shorturlmap/shorturlmap.module';
 import { filterMiddleware } from './middlewares/filter'
 import { BloomFilterService } from './services/bloomFilter.service';
 import { RedisService } from './services/redis.service'
+import { APP_FILTER } from '@nestjs/core';
+import { AllExceptionsFilter } from './exception';
 
 
 @Module({
@@ -37,6 +39,10 @@ import { RedisService } from './services/redis.service'
     providers: [
         BloomFilterService,
         RedisService,
+        {
+            provide: APP_FILTER,
+            useClass: AllExceptionsFilter
+        }
         // ShortUrlMapService
     ]
 })

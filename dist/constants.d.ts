@@ -9,3 +9,13 @@ export declare const redisConfig: {
     port: string;
     password: string;
 };
+export declare const ERROR: {
+    INVALID_SHORTURL: {
+        code: string;
+        message: string;
+    };
+    INVALID_LONGURL: {
+        code: string;
+        message: string;
+    };
+};

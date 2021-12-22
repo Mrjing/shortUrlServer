@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.BloomFilterService = void 0;
 const common_1 = require("@nestjs/common");
-const redis_service_1 = require("./redis.service");
+const redis_service_1 = require("../services/redis.service");
 const bloomfilter_redis_1 = __importDefault(require("bloomfilter-redis"));
 let BloomFilterService = class BloomFilterService {
     constructor(redisService) {

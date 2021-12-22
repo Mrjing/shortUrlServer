@@ -33,12 +33,17 @@ let ShortUrlMapController = class ShortUrlMapController {
     }
     async getLongUrl(query = {}) {
         const { shortUrl } = query;
+        if (!shortUrl) {
+            throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_SHORTURL), { message: 'shortUrl not exist in url query!' })));
+        }
         const { pathnameValue, hashFlag, realShortUrl } = this.transformReqShortUrl(shortUrl);
         try {
             let longUrl = await this.redisService.get(pathnameValue);
             if (longUrl) {
                 console.log('读redis 缓存');
-                return longUrl;
+                return {
+                    data: longUrl
+                };
             }
         }
         catch (e) {
@@ -52,14 +57,18 @@ let ShortUrlMapController = class ShortUrlMapController {
         console.log('urlMapRes', urlMapRes);
         if (urlMapRes.length === 0) {
             return {
-                code: 'SHORTURL_NOTEXIST',
-                message: '当前短链不存在'
+                data: ''
             };
         }
-        return urlMapRes[0].longUrl;
+        return {
+            data: urlMapRes[0].longUrl
+        };
     }
     async deleteShortUrlMap(body) {
         const { shortUrl } = body;
+        if (!shortUrl) {
+            throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_SHORTURL), { message: 'shortUrl not exist in url query' })));
+        }
         const { pathnameValue, hashFlag, realShortUrl } = this.transformReqShortUrl(shortUrl);
         const res = await this.shortUrlService.deleteShortUrlMap({
             shortUrl: realShortUrl,
@@ -67,14 +76,18 @@ let ShortUrlMapController = class ShortUrlMapController {
         });
         console.log('res', res);
         try {
-            await this.redisService.set(pathnameValue, '', 0);
+            await this.redisService.set(pathnameValue, '', 1);
         }
         catch (e) {
             console.log('redis 写异常打印', e);
         }
     }
     async createShortUrl(body, req) {
+        console.log('body', body);
         const { longUrl, expireTime } = body;
+        if (!longUrl) {
+            throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_LONGURL), { message: 'longUrl not exist in req body!' })));
+        }
         const hashFlag = this.hashServive.getEnvByHashUrl(longUrl);
         const existUrlMap = await this.shortUrlService.queryShortUrlMap({
             longUrl,
@@ -82,7 +95,9 @@ let ShortUrlMapController = class ShortUrlMapController {
         });
         console.log('existUrlMap', existUrlMap);
         if (existUrlMap.length) {
-            return `http://${req.hostname}/${hashFlag}${existUrlMap[0].shortUrl}`;
+            return {
+                data: `http://${req.hostname}/${hashFlag}${existUrlMap[0].shortUrl}`
+            };
         }
         const curTime = new Date();
         let finalExpireTime;
@@ -121,7 +136,9 @@ let ShortUrlMapController = class ShortUrlMapController {
         catch (e) {
             console.log('bloomFilter 添加元素报错', e);
         }
-        return shortUrl;
+        return {
+            data: shortUrl
+        };
     }
     idToShortUrl(id) {
         let shorturl = [];

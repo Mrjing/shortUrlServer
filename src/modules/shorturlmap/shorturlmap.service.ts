@@ -101,6 +101,7 @@ export class ShortUrlMapService {
         if (id !== undefined) {
             findParams.id = id
         }
+        console.log('findParams', findParams)
         return this.getDbByFlag(flag).find(findParams)
     }
 

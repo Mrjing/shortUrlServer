@@ -1,7 +1,8 @@
 import { Injectable, NestMiddleware, Query } from '@nestjs/common';
 import { Response, Request } from 'express';
-import { parse } from 'url';
+import { transformReqShortUrl } from '../utils';
 import { BloomFilterService } from '../services/bloomFilter.service'
+import { ERROR } from '../constants'
 
 @Injectable()
 export class filterMiddleware implements NestMiddleware {
@@ -16,33 +17,30 @@ export class filterMiddleware implements NestMiddleware {
             const { shortUrl } = query
             if (!shortUrl) {
                 // get请求 不存在shortUrl 则报错
-                res.end(JSON.stringify({
-                    code: 'INVALID_PARAMS',
+                throw new Error(JSON.stringify({
+                    ...ERROR.INVALID_SHORTURL,
                     message: 'please set the shortUrl value in url query'
                 }));
             } else {
                 // bloomFilter 检查
                 console.log('shortUrl', shortUrl)
-                const url = new URL(shortUrl)
-                const urlPathname = url.pathname
-                const urlHost = url.hostname
+
+                const { hostname, pathnameValue } = transformReqShortUrl(shortUrl)
 
                 // shortUrl host 与 req host 不一致
-                if (urlHost !== req.hostname) {
-                    res.end(JSON.stringify({
-                        code: 'INVALID_SHORTURL',
-                        message: 'invalid short url hostname'
+                if (hostname !== req.hostname) {
+                    throw new Error(JSON.stringify({
+                        ...ERROR.INVALID_SHORTURL,
+                        message: 'the shortUrl hostname is different from req hostname'
                     }))
                 }
-                // pathname长度一定大于2 （/ + 存在一位hash位）
-                if (urlPathname.length <= 2) {
-                    res.end(JSON.stringify({
-                        code: 'INVALID_SHORTURL',
-                        message: 'invalid short url'
+                // pathname长度一定大于1 （存在一位hash位）
+                if (pathnameValue.length <= 1) {
+                    throw new Error(JSON.stringify({
+                        ...ERROR.INVALID_SHORTURL,
+                        message: 'the shortUrl pathname length must more than 2'
                     }))
-                    return
                 }
-                const pathnameValue = urlPathname.substring(1) // 获取 / 之后的字符串
                 console.log('pathnameValue', pathnameValue)
                 const isMayExistInDb = await this.bloomFilterService.hasItemInBloomFilter(pathnameValue)
                 console.log('isMayExistInDb', isMayExistInDb)
@@ -51,11 +49,10 @@ export class filterMiddleware implements NestMiddleware {
                     return
                 } else {
                     // 不存在则报错
-                    res.end(JSON.stringify({
-                        code: 'INVALID_SHORTURL',
-                        message: 'invalid short url'
+                    throw new Error(JSON.stringify({
+                        ...ERROR.INVALID_SHORTURL,
+                        message: 'shortUrl is not exist in DB'
                     }))
-                    return
                 }
             }
         }

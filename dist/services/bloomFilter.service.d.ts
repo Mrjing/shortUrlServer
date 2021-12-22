@@ -1,4 +1,4 @@
-import { RedisService } from '@/services/redis.service';
+import { RedisService } from '../services/redis.service';
 export declare class BloomFilterService {
     private readonly redisService;
     private bloomFilter;
