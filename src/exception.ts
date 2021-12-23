@@ -10,7 +10,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const response = ctx.getResponse();
         const request = ctx.getRequest();
 
-        console.log('exception', exception.message)
         let exceptionObj: any = {}, code = '', message = ''
         try {
             exceptionObj = JSON.parse(exception.message)

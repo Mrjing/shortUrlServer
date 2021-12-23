@@ -22,16 +22,16 @@ export declare class ShortUrlMapService {
             longUrl?: string;
         };
         flag: string;
-    }): Promise<any>;
+    }): Promise<import("typeorm").UpdateResult>;
     queryShortUrlMap(params: {
         shortUrl?: string;
         longUrl?: string;
         id?: number;
         flag?: string;
-    }): Promise<any>;
+    }): Promise<ShortUrlMap[]>;
     deleteShortUrlMap(params: {
         shortUrl?: string;
         flag?: string;
-    }): Promise<any>;
+    }): Promise<import("typeorm").DeleteResult>;
     getDbByFlag(flag: string): Repository<ShortUrlMap>;
 }

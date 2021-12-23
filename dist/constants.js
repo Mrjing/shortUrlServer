@@ -1,11 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ERROR = exports.redisConfig = exports.CHARIN62 = exports.BACKUP_ENV = exports.PRIMARY_ENV = exports.Collection = void 0;
-exports.Collection = {
-    ShortUrl: `shortUrl`
-};
-exports.PRIMARY_ENV = 'shorturl-server-9gcdhkphe26cf284';
-exports.BACKUP_ENV = 'shorturl-server-9gcdhkphe26cf284';
+exports.ERROR = exports.redisConfig = exports.CHARIN62 = void 0;
 exports.CHARIN62 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 exports.redisConfig = {
     host: 'sh-crs-a5v7i5ba.sql.tencentcdb.com',
@@ -20,6 +15,10 @@ exports.ERROR = {
     INVALID_LONGURL: {
         code: 'INVALID_LONGURL',
         message: 'long url is invalid, please check'
+    },
+    SYS_ERR: {
+        code: 'SYS_ERR',
+        message: 'some system error'
     }
 };
 //# sourceMappingURL=constants.js.map

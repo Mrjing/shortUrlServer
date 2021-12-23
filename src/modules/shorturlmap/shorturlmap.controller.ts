@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common'
 import _ from 'lodash'
 import { ShortUrlMapService } from './shorturlmap.service'
-import { Collection, PRIMARY_ENV, BACKUP_ENV, CHARIN62, ERROR } from '../../constants'
+import { CHARIN62, ERROR } from '../../constants'
 import { HashService } from '../../services/hash.service'
 import { calSingleCharSub, transformReqShortUrl } from '../../utils'
 import { RedisService } from '../../services/redis.service'
@@ -29,6 +29,14 @@ interface IDeleteShortUrlMapReq {
     shortUrl?: string
 }
 
+interface IGetLongUrlRes {
+    data: string
+}
+
+interface ICreateShortUrlRes {
+    data: string
+}
+
 @Controller('shortUrl')
 export class ShortUrlMapController {
     constructor(
@@ -40,7 +48,7 @@ export class ShortUrlMapController {
 
     // 通过短链获取长链
     @Get()
-    async getLongUrl(@Query() query: { shortUrl?: string } = {}) {
+    async getLongUrl(@Query() query: { shortUrl?: string } = {}): Promise<IGetLongUrlRes> {
         const { shortUrl } = query
 
         // 判断 shortUrl 是否存在
@@ -56,7 +64,7 @@ export class ShortUrlMapController {
 
         // 先请求redis 查询
         try {
-            let longUrl = await this.redisService.get(pathnameValue)
+            let longUrl: string = await this.redisService.get(pathnameValue)
             if (longUrl) {
                 console.log('读redis 缓存')
                 return {
@@ -92,7 +100,7 @@ export class ShortUrlMapController {
      * @memberof ShortUrlMapController
      */
     @Delete()
-    async deleteShortUrlMap(@Body() body: IDeleteShortUrlMapReq) {
+    async deleteShortUrlMap(@Body() body: IDeleteShortUrlMapReq): Promise<void> {
         const { shortUrl } = body
 
         // 判断 shortUrl 是否存在
@@ -122,7 +130,7 @@ export class ShortUrlMapController {
 
     // 生成短链
     @Post()
-    async createShortUrl(@Body() body: ICreateShortUrlReq, @Req() req): Promise<{ data: string }> {
+    async createShortUrl(@Body() body: ICreateShortUrlReq, @Req() req): Promise<ICreateShortUrlRes> {
         console.log('body', body)
         const { longUrl, expireTime } = body
 

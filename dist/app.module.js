@@ -25,9 +25,10 @@ AppModule = __decorate([
         imports: [
             typeorm_1.TypeOrmModule.forRoot({
                 type: 'mysql',
-                host: '127.0.0.1',
-                port: 3306,
+                host: 'sh-cdb-lvon9ex8.sql.tencentcdb.com',
+                port: 59246,
                 username: 'root',
+                password: '33333333ll',
                 database: 'test',
                 entities: [__dirname + '/**/*.entity{.ts,.js}'],
                 synchronize: true,

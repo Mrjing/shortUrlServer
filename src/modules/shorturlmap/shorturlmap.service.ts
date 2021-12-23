@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common'
-// import { getCloudBaseApp } from '@/utils'
-import { Collection } from '../../constants'
-// import { CloudBase, Database } from '@cloudbase/node-sdk'
 import { InjectRepository, InjectEntityManager, InjectConnection } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ShortUrlMap } from './shorturlmap.entity';
-import { EntityManager, Connection } from 'typeorm';
 
 
 export interface IShortUrlMap {
@@ -22,10 +18,6 @@ export class ShortUrlMapService {
         private readonly primaryShortUrlMapRepository: Repository<ShortUrlMap>,
         @InjectRepository(ShortUrlMap, 'backup')
         private readonly backUpShortUrlMapRepository: Repository<ShortUrlMap>,
-        // @InjectConnection('primary')
-        // private connection: Connection,
-        // @InjectEntityManager('primary')
-        // private entityManager: EntityManager,
     ) { }
     /**
      * 存入长链与短链的映射关系
@@ -71,7 +63,7 @@ export class ShortUrlMapService {
             longUrl?: string
         },
         flag: string
-    }): Promise<any> {
+    }) {
         const { id, updateData, flag } = params
         return this.getDbByFlag(flag).update({
             id
@@ -89,7 +81,7 @@ export class ShortUrlMapService {
         longUrl?: string,
         id?: number
         flag?: string
-    }): Promise<any> {
+    }) {
         const { shortUrl, longUrl, id, flag } = params
         let findParams: any = {}
         if (shortUrl) {
@@ -114,7 +106,7 @@ export class ShortUrlMapService {
     async deleteShortUrlMap(params: {
         shortUrl?: string,
         flag?: string
-    }): Promise<any> {
+    }) {
         const { shortUrl, flag } = params
         const reqParams: any = {}
         if (shortUrl) {

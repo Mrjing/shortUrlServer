@@ -8,16 +8,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AllExceptionsFilter = void 0;
 const common_1 = require("@nestjs/common");
+const constants_1 = require("./constants");
 let AllExceptionsFilter = class AllExceptionsFilter {
     catch(exception, host) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse();
         const request = ctx.getRequest();
-        console.log('exception', exception.message);
-        const exceptionObj = JSON.parse(exception.message);
+        let exceptionObj = {}, code = '', message = '';
+        try {
+            exceptionObj = JSON.parse(exception.message);
+            code = exceptionObj.code;
+            message = exceptionObj.message;
+        }
+        catch (e) {
+            code = constants_1.ERROR.SYS_ERR.code;
+            message = e.message;
+        }
         response.send({
-            code: exceptionObj.code,
-            message: exceptionObj.message
+            code,
+            message
         });
     }
 };

@@ -1,8 +1,3 @@
-export declare const Collection: {
-    ShortUrl: string;
-};
-export declare const PRIMARY_ENV = "shorturl-server-9gcdhkphe26cf284";
-export declare const BACKUP_ENV = "shorturl-server-9gcdhkphe26cf284";
 export declare const CHARIN62 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 export declare const redisConfig: {
     host: string;
@@ -15,6 +10,10 @@ export declare const ERROR: {
         message: string;
     };
     INVALID_LONGURL: {
+        code: string;
+        message: string;
+    };
+    SYS_ERR: {
         code: string;
         message: string;
     };

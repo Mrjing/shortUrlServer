@@ -14,14 +14,14 @@ import { AllExceptionsFilter } from './exception';
     imports: [
         TypeOrmModule.forRoot({
             type: 'mysql',
-            host: '127.0.0.1',
-            port: 3306,
+            host: 'sh-cdb-lvon9ex8.sql.tencentcdb.com',
+            port: 59246,
             username: 'root',
-            // password: 'root',
+            password: '33333333ll',
             database: 'test',
             entities: [__dirname + '/**/*.entity{.ts,.js}'],
             synchronize: true,
-            name: 'primary', // 主库
+            name: 'primary', // 0 库
         }),
         TypeOrmModule.forRoot({
             type: 'mysql',
@@ -32,7 +32,7 @@ import { AllExceptionsFilter } from './exception';
             database: 'test',
             entities: [__dirname + '/**/*.entity{.ts,.js}'],
             synchronize: true,
-            name: 'backup', // 从库
+            name: 'backup', // 1 库
         }),
         ShortUrlMapModule
     ],

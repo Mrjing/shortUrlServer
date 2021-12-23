@@ -12,7 +12,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ShortUrlMapController = exports.EnvIdToShortFlagMap = void 0;
+exports.ShortUrlMapController = void 0;
 const common_1 = require("@nestjs/common");
 const shorturlmap_service_1 = require("./shorturlmap.service");
 const constants_1 = require("../../constants");
@@ -20,10 +20,6 @@ const hash_service_1 = require("../../services/hash.service");
 const utils_1 = require("../../utils");
 const redis_service_1 = require("../../services/redis.service");
 const bloomFilter_service_1 = require("../../services/bloomFilter.service");
-exports.EnvIdToShortFlagMap = {
-    [constants_1.PRIMARY_ENV]: '0',
-    [constants_1.BACKUP_ENV]: '1'
-};
 let ShortUrlMapController = class ShortUrlMapController {
     constructor(shortUrlService, hashServive, redisService, bloomFilterService) {
         this.shortUrlService = shortUrlService;
@@ -36,7 +32,7 @@ let ShortUrlMapController = class ShortUrlMapController {
         if (!shortUrl) {
             throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_SHORTURL), { message: 'shortUrl not exist in url query!' })));
         }
-        const { pathnameValue, hashFlag, realShortUrl } = this.transformReqShortUrl(shortUrl);
+        const { pathnameValue, hashFlag, realShortUrl } = utils_1.transformReqShortUrl(shortUrl);
         try {
             let longUrl = await this.redisService.get(pathnameValue);
             if (longUrl) {
@@ -69,7 +65,7 @@ let ShortUrlMapController = class ShortUrlMapController {
         if (!shortUrl) {
             throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_SHORTURL), { message: 'shortUrl not exist in url query' })));
         }
-        const { pathnameValue, hashFlag, realShortUrl } = this.transformReqShortUrl(shortUrl);
+        const { pathnameValue, hashFlag, realShortUrl } = utils_1.transformReqShortUrl(shortUrl);
         const res = await this.shortUrlService.deleteShortUrlMap({
             shortUrl: realShortUrl,
             flag: hashFlag
@@ -159,17 +155,6 @@ let ShortUrlMapController = class ShortUrlMapController {
                 id = id * 62 + utils_1.calSingleCharSub(shortUrl[i], '0') + 52;
         }
         return id;
-    }
-    transformReqShortUrl(originShortUrl) {
-        const pathname = new URL(originShortUrl).pathname;
-        const pathnameValue = pathname.substring(1);
-        const hashFlag = pathnameValue[0];
-        const realShortUrl = pathnameValue.substring(1);
-        return {
-            pathnameValue,
-            hashFlag,
-            realShortUrl
-        };
     }
 };
 __decorate([

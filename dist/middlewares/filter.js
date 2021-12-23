@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.filterMiddleware = void 0;
 const common_1 = require("@nestjs/common");
+const utils_1 = require("../utils");
 const bloomFilter_service_1 = require("../services/bloomFilter.service");
 const constants_1 = require("../constants");
 let filterMiddleware = class filterMiddleware {
@@ -27,16 +28,13 @@ let filterMiddleware = class filterMiddleware {
             }
             else {
                 console.log('shortUrl', shortUrl);
-                const url = new URL(shortUrl);
-                const urlPathname = url.pathname;
-                const urlHost = url.hostname;
-                if (urlHost !== req.hostname) {
+                const { hostname, pathnameValue } = utils_1.transformReqShortUrl(shortUrl);
+                if (hostname !== req.hostname) {
                     throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_SHORTURL), { message: 'the shortUrl hostname is different from req hostname' })));
                 }
-                if (urlPathname.length <= 2) {
+                if (pathnameValue.length <= 1) {
                     throw new Error(JSON.stringify(Object.assign(Object.assign({}, constants_1.ERROR.INVALID_SHORTURL), { message: 'the shortUrl pathname length must more than 2' })));
                 }
-                const pathnameValue = urlPathname.substring(1);
                 console.log('pathnameValue', pathnameValue);
                 const isMayExistInDb = await this.bloomFilterService.hasItemInBloomFilter(pathnameValue);
                 console.log('isMayExistInDb', isMayExistInDb);
