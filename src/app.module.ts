@@ -8,28 +8,33 @@ import { BloomFilterService } from './services/bloomFilter.service';
 import { RedisService } from './services/redis.service'
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './exception';
+import { ConfigModule } from '@nestjs/config'
 
 
 @Module({
     imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            envFilePath: '.env.local'
+        }),
         TypeOrmModule.forRoot({
             type: 'mysql',
-            host: 'sh-cdb-lvon9ex8.sql.tencentcdb.com',
-            port: 59246,
-            username: 'root',
-            password: '33333333ll',
-            database: 'test',
+            host: process.env.PRIMARY_MYSQL_HOST,
+            port: parseInt(process.env.PRIMARY_MYSQL_PORT),
+            username: process.env.PRIMARY_MYSQL_USERNAME,
+            password: process.env.PRIMARY_MYSQL_PASSWORD,
+            database: process.env.PRIMARY_MYSQL_DATABASE,
             entities: [__dirname + '/**/*.entity{.ts,.js}'],
             synchronize: true,
             name: 'primary', // 0 库
         }),
         TypeOrmModule.forRoot({
             type: 'mysql',
-            host: 'sh-cdb-4op54oiq.sql.tencentcdb.com',
-            port: 59276,
-            username: 'root',
-            password: '33883386kk',
-            database: 'test',
+            host: process.env.BACKUP_MYSQL_HOST,
+            port: parseInt(process.env.BACKUP_MYSQL_PORT),
+            username: process.env.BACKUP_MYSQL_USERNAME,
+            password: process.env.BACKUP_MYSQL_PASSWORD,
+            database: process.env.BACKUP_MYSQL_DATABASE,
             entities: [__dirname + '/**/*.entity{.ts,.js}'],
             synchronize: true,
             name: 'backup', // 1 库

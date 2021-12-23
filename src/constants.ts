@@ -2,9 +2,9 @@
 export const CHARIN62 = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
 
 export const redisConfig = {
-    host: 'sh-crs-a5v7i5ba.sql.tencentcdb.com',
-    port: '27820',
-    password: '33333333ll'
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    password: process.env.REDIS_PASSWORD
 }
 
 export const ERROR = {
