@@ -11,28 +11,28 @@
 基于长链生成短链
 
 ```bash
-curl -X POST -d "longUrl=http://www.baidu.com" http://hostname/shortUrl
+curl -X POST -d "longUrl=http://www.baidu.com" https://f-xj.cn/shortUrl
 ```
 
 回包结构
 
 ```json
 {
-  "data": "" //
+  "data": "http://f-xj.cn/1b" //
 }
 ```
 
 基于短链换回长链
 
 ```bash
-curl http://hostname/shortUrl?shortUrl=
+curl https://f-xj.cn/shortUrl?shortUrl=https://f-xj.cn/1b
 ```
 
 回包结构
 
 ```json
 {
-  "data": "" //
+  "data": "http://www.baidu.com" //
 }
 ```
 

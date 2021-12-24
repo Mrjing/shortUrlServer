@@ -6,9 +6,7 @@ import {
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-        bodyParser: false
-    });
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
     app.disable('x-powered-by');
     const server = await app.listen(5000);
 }

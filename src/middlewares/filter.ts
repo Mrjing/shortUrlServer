@@ -42,7 +42,12 @@ export class filterMiddleware implements NestMiddleware {
                     }))
                 }
                 console.log('pathnameValue', pathnameValue)
-                const isMayExistInDb = await this.bloomFilterService.hasItemInBloomFilter(pathnameValue)
+                let isMayExistInDb = true
+                try {
+                    isMayExistInDb = await this.bloomFilterService.hasItemInBloomFilter(pathnameValue)
+                } catch (e) {
+                    console.log('查询 bloomfilter 异常', e.message)
+                }
                 console.log('isMayExistInDb', isMayExistInDb)
                 if (isMayExistInDb) {
                     next()
